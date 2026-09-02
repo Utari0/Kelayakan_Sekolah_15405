@@ -1509,6 +1509,13 @@ render_html("""
         Pilih salah satu <b>Preset Simulasi Cepat</b> di bawah untuk mengisi data otomatis dalam 1 klik, atau sesuaikan nilai indikator sekolah pada formulir. Setelah data terisi, klik tombol <b>🔍 Prediksi Kelayakan Sekolah Unggul</b> untuk melihat hasil analisis mutu dan visualisasi grafiknya.
     </p>
 </div>
+
+<div class="card">
+    <h3>💡 Petunjuk Penggunaan</h3>
+    <p>
+        Pilih salah satu <b>Preset Simulasi Cepat</b> di bawah untuk mengisi data otomatis dalam 1 klik, atau sesuaikan nilai indikator sekolah pada formulir. Setelah data terisi, klik tombol <b>🔍 Prediksi Kelayakan Sekolah Unggul</b> untuk melihat hasil analisis mutu dan visualisasi grafiknya.
+    </p>
+</div>
 """)
 
 
