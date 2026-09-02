@@ -1526,7 +1526,7 @@ render_html("""
 st.markdown('<div class="section-title">⚡ Simulasi Cepat (Quick Preset)</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-title">⚡ KIMPUL (Quick Preset)</div>', unsafe_allow_html=True)
 
-col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(5)
 
 with col_p1:
     if st.button("🌟 Sekolah UHUYY", type="secondary", use_container_width=True):
