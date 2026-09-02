@@ -1533,6 +1533,11 @@ with col_p1:
         apply_preset("unggul")
         st.rerun()
 
+with col_p1:
+    if st.button("🌟 Sekolah UHUYY", type="secondary", use_container_width=True):
+        apply_preset("unggul")
+        st.rerun()
+
 with col_p2:
     if st.button("🏫 Sekolah Standar", type="secondary", use_container_width=True):
         apply_preset("standar")
@@ -1559,14 +1564,6 @@ st.markdown('<div class="section-title">📋 Formulir Pendaftaran Sekolah</div>'
 col_left, col_right = st.columns(2)
 
 with col_left:
-    jumlah_siswa = st.number_input(
-        "👨‍🎓 Jumlah Siswa",
-        min_value=1,
-        max_value=5000,
-        step=1,
-        key="input_jumlah_siswa"
-    )
-
     jumlah_siswa = st.number_input(
         "👨‍🎓 Jumlah Siswa",
         min_value=1,
