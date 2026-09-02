@@ -1549,8 +1549,8 @@ with col_p4:
         st.rerun()
 
 with col_p5:
-    if st.button("🌟 Sekolah UHUYY", type="secondary", use_container_width=True):
-        apply_preset("unggul")
+    if st.button("🌟 Matahari", type="secondary", use_container_width=True):
+        apply_preset("matahari")
         st.rerun()
 
 
