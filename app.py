@@ -1524,6 +1524,7 @@ render_html("""
 # =========================================================
 
 st.markdown('<div class="section-title">⚡ Simulasi Cepat (Quick Preset)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">⚡ KIMPUL (Quick Preset)</div>', unsafe_allow_html=True)
 
 col_p1, col_p2, col_p3, col_p4 = st.columns(4)
 
@@ -1697,9 +1698,9 @@ prediksi = st.button("🔍  PREDIKSI KELAYAKAN SEKOLAH UNGGUL", type="primary", 
 if prediksi:
 
     # One-Hot Encoding Akreditasi
-    akreditasi_A = 1 if akreditasi == "X" else 0
-    akreditasi_B = 1 if akreditasi == "Y" else 0
-    akreditasi_C = 1 if akreditasi == "Z" else 0
+    akreditasi_A = 1 if akreditasi == "A" else 0
+    akreditasi_B = 1 if akreditasi == "B" else 0
+    akreditasi_C = 1 if akreditasi == "C" else 0
 
     data_encoded = pd.DataFrame({
         "akreditasi_A": [akreditasi_A],
