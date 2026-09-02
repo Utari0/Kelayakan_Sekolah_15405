@@ -52,22 +52,27 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --pink: #ff6f91;
-    --pink-soft: #ff8fab;
-    --pink-light: #ffe5ec;
-    --pink-subtle: #fff0f5;
-    --yellow: #ffd166;
-    --yellow-soft: #fff3b0;
-    --yellow-gold: #f59f00;
+    --pink: #5dade2;
+    --pink-soft: #85c1e9;
+    --pink-light: #d6ecfa;
+    --pink-subtle: #eef8ff;
+
+    --yellow: #90caf9;
+    --yellow-soft: #bbdefb;
+    --yellow-gold: #42a5f5;
+
     --surface: #ffffff;
-    --surface-soft: #fff9fb;
-    --ink: #4a2835;
-    --ink-light: #743b4b;
-    --muted: #8a5362;
-    --line: #ffd6df;
-    --shadow-sm: 0 4px 12px rgba(214, 51, 108, 0.06);
-    --shadow-md: 0 8px 24px rgba(214, 51, 108, 0.10);
-    --shadow-lg: 0 14px 32px rgba(214, 51, 108, 0.14);
+    --surface-soft: #f8fcff;
+
+    --ink: #243b53;
+    --ink-light: #486581;
+    --muted: #627d98;
+
+    --line: #c9e6f5;
+
+    --shadow-sm: 0 4px 12px rgba(52, 152, 219, 0.06);
+    --shadow-md: 0 8px 24px rgba(52, 152, 219, 0.10);
+    --shadow-lg: 0 14px 32px rgba(52, 152, 219, 0.14);
 }
 
 html, body, .stApp {
