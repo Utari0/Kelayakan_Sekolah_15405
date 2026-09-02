@@ -1567,6 +1567,14 @@ with col_left:
         key="input_jumlah_siswa"
     )
 
+    jumlah_siswa = st.number_input(
+        "👨‍🎓 Jumlah Siswa",
+        min_value=1,
+        max_value=5000,
+        step=1,
+        key="input_jumlah_siswa"
+    )
+
     jumlah_guru = st.number_input(
         "👩‍🏫 Jumlah Guru",
         min_value=1,
