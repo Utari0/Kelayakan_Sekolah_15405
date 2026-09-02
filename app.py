@@ -1529,7 +1529,7 @@ st.markdown('<div class="section-title">⚡ KIMPUL (Quick Preset)</div>', unsafe
 col_p1, col_p2, col_p3, col_p4 = st.columns(4)
 
 with col_p1:
-    if st.button("🌟 Sekolah Unggul", type="secondary", use_container_width=True):
+    if st.button("🌟 Sekolah UHUYY", type="secondary", use_container_width=True):
         apply_preset("unggul")
         st.rerun()
 
@@ -1554,6 +1554,7 @@ with col_p4:
 # =========================================================
 
 st.markdown('<div class="section-title">📋 Formulir Indikator Sekolah</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">📋 Formulir Pendaftaran Sekolah</div>', unsafe_allow_html=True)
 
 col_left, col_right = st.columns(2)
 
