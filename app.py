@@ -1,3 +1,52 @@
+import streamlit as st
+import pandas as pd
+import joblib
+import textwrap
+import datetime
+import base64
+import plotly.graph_objects as go
+
+
+# =========================================================
+# KONFIGURASI HALAMAN
+# =========================================================
+
+st.set_page_config(
+    page_title="Prediksi Sekolah Unggul | AI Classifier",
+    page_icon="🏫",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+
+# =========================================================
+# LOAD MODEL & ASSETS
+# =========================================================
+
+try:
+    model = joblib.load("decision_tree_sekolah.joblib")
+except Exception as e:
+    st.error("❌ Model Decision Tree tidak dapat dibuka.")
+    st.code(str(e))
+    st.stop()
+
+
+@st.cache_data
+def get_base64_logo():
+    try:
+        with open("logo.png", "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except Exception:
+        return ""
+
+
+logo_b64 = get_base64_logo()
+
+
+# =========================================================
+# CSS STYLING (AESTHETIC PASTEL PINK & GOLD + ANIMATIONS)
+# =========================================================
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -1286,3 +1335,659 @@ div.stDownloadButton > button:hover {
 
 </style>
 """, unsafe_allow_html=True)
+
+
+# =========================================================
+# HELPER FUNCTIONS & PRESETS
+# =========================================================
+
+def render_html(markup):
+    st.html(textwrap.dedent(markup))
+
+
+PRESETS = {
+    "unggul": {
+        "nama": "Sekolah Unggul (Favorit)",
+        "jumlah_siswa": 450,
+        "jumlah_guru": 30,
+        "persentase_guru_bersertifikasi": 92.5,
+        "rata_rata_nilai": 91.0,
+        "prestasi_akademik": 24,
+        "akreditasi": "A",
+        "persentase_fasilitas_layak": 95.0,
+        "kehadiran_siswa": 96.0,
+        "persentase_lulusan_melanjutkan": 92.0
+    },
+    "standar": {
+        "nama": "Sekolah Menengah (Standar)",
+        "jumlah_siswa": 400,
+        "jumlah_guru": 20,
+        "persentase_guru_bersertifikasi": 65.0,
+        "rata_rata_nilai": 76.0,
+        "prestasi_akademik": 8,
+        "akreditasi": "B",
+        "persentase_fasilitas_layak": 72.0,
+        "kehadiran_siswa": 85.0,
+        "persentase_lulusan_melanjutkan": 70.0
+    },
+    "peningkatan": {
+        "nama": "Sekolah Butuh Peningkatan",
+        "jumlah_siswa": 350,
+        "jumlah_guru": 12,
+        "persentase_guru_bersertifikasi": 40.0,
+        "rata_rata_nilai": 62.0,
+        "prestasi_akademik": 2,
+        "akreditasi": "C",
+        "persentase_fasilitas_layak": 48.0,
+        "kehadiran_siswa": 75.0,
+        "persentase_lulusan_melanjutkan": 45.0
+    },
+    "default": {
+        "nama": "Default",
+        "jumlah_siswa": 500,
+        "jumlah_guru": 30,
+        "persentase_guru_bersertifikasi": 80.0,
+        "rata_rata_nilai": 80.0,
+        "prestasi_akademik": 10,
+        "akreditasi": "A",
+        "persentase_fasilitas_layak": 85.0,
+        "kehadiran_siswa": 90.0,
+        "persentase_lulusan_melanjutkan": 80.0
+    }
+}
+
+# Inisialisasi default state
+if "input_jumlah_siswa" not in st.session_state:
+    st.session_state["input_jumlah_siswa"] = PRESETS["default"]["jumlah_siswa"]
+if "input_jumlah_guru" not in st.session_state:
+    st.session_state["input_jumlah_guru"] = PRESETS["default"]["jumlah_guru"]
+if "input_guru_bersertifikasi" not in st.session_state:
+    st.session_state["input_guru_bersertifikasi"] = PRESETS["default"]["persentase_guru_bersertifikasi"]
+if "input_rata_rata_nilai" not in st.session_state:
+    st.session_state["input_rata_rata_nilai"] = PRESETS["default"]["rata_rata_nilai"]
+if "input_prestasi_akademik" not in st.session_state:
+    st.session_state["input_prestasi_akademik"] = PRESETS["default"]["prestasi_akademik"]
+if "input_akreditasi" not in st.session_state:
+    st.session_state["input_akreditasi"] = PRESETS["default"]["akreditasi"]
+if "input_fasilitas_layak" not in st.session_state:
+    st.session_state["input_fasilitas_layak"] = PRESETS["default"]["persentase_fasilitas_layak"]
+if "input_kehadiran_siswa" not in st.session_state:
+    st.session_state["input_kehadiran_siswa"] = PRESETS["default"]["kehadiran_siswa"]
+if "input_lulusan_melanjutkan" not in st.session_state:
+    st.session_state["input_lulusan_melanjutkan"] = PRESETS["default"]["persentase_lulusan_melanjutkan"]
+
+
+def apply_preset(preset_key):
+    preset = PRESETS[preset_key]
+    st.session_state["input_jumlah_siswa"] = int(preset["jumlah_siswa"])
+    st.session_state["input_jumlah_guru"] = int(preset["jumlah_guru"])
+    st.session_state["input_guru_bersertifikasi"] = float(preset["persentase_guru_bersertifikasi"])
+    st.session_state["input_rata_rata_nilai"] = float(preset["rata_rata_nilai"])
+    st.session_state["input_prestasi_akademik"] = int(preset["prestasi_akademik"])
+    st.session_state["input_akreditasi"] = preset["akreditasi"]
+    st.session_state["input_fasilitas_layak"] = float(preset["persentase_fasilitas_layak"])
+    st.session_state["input_kehadiran_siswa"] = float(preset["kehadiran_siswa"])
+    st.session_state["input_lulusan_melanjutkan"] = float(preset["persentase_lulusan_melanjutkan"])
+
+
+# =========================================================
+# SIDEBAR
+# =========================================================
+
+with st.sidebar:
+    if logo_b64:
+        render_html(f"""
+        <div class="sidebar-logo-box">
+            <img src="data:image/png;base64,{logo_b64}" class="sidebar-logo" alt="Logo Sekolah Unggul" />
+        </div>
+        """)
+    else:
+        st.image("logo.png", use_container_width=True)
+
+    render_html("""
+    <div style="text-align:center; padding: 2px 0 12px;">
+        <span class="sidebar-badge">✨ AI EDUCATION SYSTEM</span>
+        <h2 style="margin: 4px 0 2px; font-weight: 800;">Sekolah Unggul</h2>
+        <p style="margin: 0; opacity: 0.9; font-size: 13.5px;">
+            Sistem Prediksi Berbasis Machine Learning
+        </p>
+    </div>
+    """)
+
+    st.markdown("---")
+
+    render_html("""
+    <div class="sidebar-card">
+        <h4 style="margin: 0 0 8px; color: #ffffff; font-weight: 800;">📌 Tentang Sistem</h4>
+        Sistem ini menggunakan algoritma klasifikasi <b>Decision Tree</b> untuk memprediksi mutu kelayakan sekolah berdasarkan 9 indikator utama kualitas pendidikan.
+        <br><br>
+        <b>Model:</b> 🌳 Decision Tree Classifier<br>
+        <b>Fitur:</b> 🎯 Visualisasi Mutu & Analisis Cerdas
+    </div>
+    """)
+
+
+# =========================================================
+# HEADER / HERO SECTION (DENGAN ANIMASI LOGO MELAYANG & AURA)
+# =========================================================
+
+col_logo, col_hero = st.columns([1.25, 4.75])
+
+with col_logo:
+    if logo_b64:
+        render_html(f"""
+        <div class="logo-hero-box">
+            <div class="logo-aura"></div>
+            <img src="data:image/png;base64,{logo_b64}" class="floating-logo" alt="Logo Sekolah Unggul" />
+        </div>
+        """)
+    else:
+        st.image("logo.png", width=200)
+
+with col_hero:
+    render_html("""
+    <div class="hero-badge">
+        <span>✨</span> Machine Learning Decision Tree Classifier • Standar Mutu Pendidikan
+    </div>
+    <div class="main-title">Sistem Prediksi Sekolah Unggul</div>
+    <div class="main-subtitle">
+        Evaluasi dan klasifikasikan kualitas sekolah secara otomatis berdasarkan data akademik, tenaga pendidik, fasilitas, serta capaian kelulusan siswa.
+    </div>
+    """)
+
+st.markdown("---")
+
+
+# =========================================================
+# KARTU PETUNJUK
+# =========================================================
+
+render_html("""
+<div class="card">
+    <h3>💡 Petunjuk Penggunaan</h3>
+    <p>
+        Pilih salah satu <b>Preset Simulasi Cepat</b> di bawah untuk mengisi data otomatis dalam 1 klik, atau sesuaikan nilai indikator sekolah pada formulir. Setelah data terisi, klik tombol <b>🔍 Prediksi Kelayakan Sekolah Unggul</b> untuk melihat hasil analisis mutu dan visualisasi grafiknya.
+    </p>
+</div>
+""")
+
+
+# =========================================================
+# TOMBOL PRESET / QUICK DEMO (PILL CHIPS)
+# =========================================================
+
+st.markdown('<div class="section-title">⚡ Simulasi Cepat (Quick Preset)</div>', unsafe_allow_html=True)
+
+col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+
+with col_p1:
+    if st.button("🌟 Sekolah Unggul", type="secondary", use_container_width=True):
+        apply_preset("unggul")
+        st.rerun()
+
+with col_p2:
+    if st.button("🏫 Sekolah Standar", type="secondary", use_container_width=True):
+        apply_preset("standar")
+        st.rerun()
+
+with col_p3:
+    if st.button("⚠️ Perlu Peningkatan", type="secondary", use_container_width=True):
+        apply_preset("peningkatan")
+        st.rerun()
+
+with col_p4:
+    if st.button("🔄 Reset ke Awal", type="secondary", use_container_width=True):
+        apply_preset("default")
+        st.rerun()
+
+
+# =========================================================
+# FORMULIR DATA SEKOLAH
+# =========================================================
+
+st.markdown('<div class="section-title">📋 Formulir Indikator Sekolah</div>', unsafe_allow_html=True)
+
+col_left, col_right = st.columns(2)
+
+with col_left:
+    jumlah_siswa = st.number_input(
+        "👨‍🎓 Jumlah Siswa",
+        min_value=1,
+        max_value=5000,
+        step=1,
+        key="input_jumlah_siswa"
+    )
+
+    jumlah_guru = st.number_input(
+        "👩‍🏫 Jumlah Guru",
+        min_value=1,
+        max_value=500,
+        step=1,
+        key="input_jumlah_guru"
+    )
+
+    persentase_guru_bersertifikasi = st.number_input(
+        "🎓 Guru Bersertifikasi (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.5,
+        format="%.1f",
+        key="input_guru_bersertifikasi"
+    )
+
+    rata_rata_nilai = st.number_input(
+        "📚 Rata-rata Nilai Akademik",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.5,
+        format="%.1f",
+        key="input_rata_rata_nilai"
+    )
+
+    prestasi_akademik = st.number_input(
+        "🏆 Jumlah Prestasi Akademik",
+        min_value=0,
+        max_value=100,
+        step=1,
+        key="input_prestasi_akademik"
+    )
+
+with col_right:
+    akreditasi_options = ["A", "B", "C"]
+    akreditasi = st.selectbox(
+        "🏅 Akreditasi Sekolah",
+        akreditasi_options,
+        key="input_akreditasi"
+    )
+
+    persentase_fasilitas_layak = st.number_input(
+        "🏢 Fasilitas Layak (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.5,
+        format="%.1f",
+        key="input_fasilitas_layak"
+    )
+
+    kehadiran_siswa = st.number_input(
+        "📅 Kehadiran Siswa (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.5,
+        format="%.1f",
+        key="input_kehadiran_siswa"
+    )
+
+    persentase_lulusan_melanjutkan = st.number_input(
+        "🎓 Lulusan Melanjutkan Pendidikan (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.5,
+        format="%.1f",
+        key="input_lulusan_melanjutkan"
+    )
+
+
+# =========================================================
+# RASIO GURU & SISWA DENGAN STATUS CERDAS
+# =========================================================
+
+rasio_guru_siswa = jumlah_siswa / max(jumlah_guru, 1)
+
+if 12 <= rasio_guru_siswa <= 20:
+    badge_status = "🟢 Rasio Sangat Ideal"
+    badge_color = "#2b8a3e"
+    badge_bg = "#ebfbee"
+    badge_text = "Sangat sesuai dengan standar Permendikbud (1 : 15 s/d 1 : 20)"
+elif 20 < rasio_guru_siswa <= 28:
+    badge_status = "🟡 Rasio Cukup Wajar"
+    badge_color = "#d97706"
+    badge_bg = "#fffbeb"
+    badge_text = "Masih dalam batas wajar kapasitas pengajaran guru"
+elif rasio_guru_siswa > 28:
+    badge_status = "🔴 Rasio Padat (Kurang Guru)"
+    badge_color = "#e11d48"
+    badge_bg = "#ffe4e6"
+    badge_text = "Jumlah siswa per guru cukup tinggi, disarankan penambahan guru"
+else:
+    badge_status = "🔵 Rasio Sangat Renggang"
+    badge_color = "#2563eb"
+    badge_bg = "#eff6ff"
+    badge_text = "Proporsi guru sangat mencukupi dibanding jumlah siswa"
+
+render_html(f"""
+<div class="ratio-card-wrapper">
+    <div class="ratio-info">
+        <h4>👥 Rasio Guru dan Siswa</h4>
+        <div class="ratio-big-value">1 : {rasio_guru_siswa:.2f}</div>
+        <p>Setiap 1 orang guru membimbing rata-rata {rasio_guru_siswa:.1f} siswa</p>
+    </div>
+    <div>
+        <div class="ratio-badge" style="color: {badge_color}; background: {badge_bg}; border: 1px solid {badge_color}33;">
+            {badge_status}
+        </div>
+        <div style="font-size: 12.5px; color: #8a5362; margin-top: 6px; text-align: right;">
+            {badge_text}
+        </div>
+    </div>
+</div>
+""")
+
+
+# =========================================================
+# TOMBOL PREDIKSI
+# =========================================================
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+prediksi = st.button("🔍  PREDIKSI KELAYAKAN SEKOLAH UNGGUL", type="primary", use_container_width=True)
+
+
+# =========================================================
+# PROSES PREDIKSI & VISUALISASI
+# =========================================================
+
+if prediksi:
+
+    # One-Hot Encoding Akreditasi
+    akreditasi_A = 1 if akreditasi == "A" else 0
+    akreditasi_B = 1 if akreditasi == "B" else 0
+    akreditasi_C = 1 if akreditasi == "C" else 0
+
+    data_encoded = pd.DataFrame({
+        "akreditasi_A": [akreditasi_A],
+        "akreditasi_B": [akreditasi_B],
+        "akreditasi_C": [akreditasi_C],
+        "jumlah_siswa": [jumlah_siswa],
+        "jumlah_guru": [jumlah_guru],
+        "rasio_guru_siswa": [rasio_guru_siswa],
+        "persentase_guru_bersertifikasi": [persentase_guru_bersertifikasi],
+        "rata_rata_nilai": [rata_rata_nilai],
+        "prestasi_akademik": [prestasi_akademik],
+        "persentase_fasilitas_layak": [persentase_fasilitas_layak],
+        "kehadiran_siswa": [kehadiran_siswa],
+        "persentase_lulusan_melanjutkan": [persentase_lulusan_melanjutkan]
+    })
+
+    try:
+        hasil = model.predict(data_encoded)[0]
+        probabilitas = model.predict_proba(data_encoded)[0]
+        prob_dict = dict(zip(model.classes_, probabilitas))
+        confidence_unggul = prob_dict.get("Unggul", 0.0) * 100
+        confidence_tidak = prob_dict.get("Tidak Unggul", 0.0) * 100
+
+        # Efek Balon Animasi jika Unggul
+        if hasil == "Unggul":
+            st.balloons()
+
+        st.markdown("---")
+        st.markdown('<div class="section-title">🎯 Hasil Klasifikasi & Analisis Mutu</div>', unsafe_allow_html=True)
+
+        # 1. BANNER HASIL
+        if hasil == "Unggul":
+            render_html(f"""
+            <div class="result-unggul">
+                <div style="font-size: 64px; line-height: 1;">🏆</div>
+                <h2>SEKOLAH TERKLASIFIKASI UNGGUL</h2>
+                <p>
+                    Berdasarkan evaluasi algoritma Decision Tree, sekolah ini memiliki mutu di atas rata-rata dengan tingkat keyakinan model sebesar <b>{confidence_unggul:.1f}%</b>.
+                </p>
+            </div>
+            """)
+        else:
+            render_html(f"""
+            <div class="result-tidak">
+                <div style="font-size: 64px; line-height: 1;">📌</div>
+                <h2>SEKOLAH BELUM UNGGUL</h2>
+                <p>
+                    Berdasarkan evaluasi indikator saat ini, sekolah memerlukan peningkatan pada beberapa aspek mutu untuk mencapai predikat Unggul (Keyakinan: <b>{confidence_tidak:.1f}%</b>).
+                </p>
+            </div>
+            """)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # 2. GRAFIK INTERAKTIF (DONUT CHART & RADAR CHART)
+        col_g1, col_g2 = st.columns([1.1, 1.4])
+
+        with col_g1:
+            st.markdown('<h4 style="color:#d6336c; font-weight:700; margin-bottom:0;">🍩 Tingkat Keyakinan Model</h4>', unsafe_allow_html=True)
+            
+            # Donut Chart Plotly
+            donut_colors = ['#ff6f91', '#ffd166'] if model.classes_[0] == 'Unggul' else ['#ffd166', '#ff6f91']
+            fig_donut = go.Figure(data=[go.Pie(
+                labels=list(model.classes_),
+                values=[float(p) for p in probabilitas],
+                hole=0.64,
+                marker=dict(
+                    colors=donut_colors,
+                    line=dict(color='#ffffff', width=3)
+                ),
+                textinfo='label+percent',
+                textfont=dict(size=13, family='Plus Jakarta Sans', color='#4a2835'),
+                hoverinfo='label+percent',
+            )])
+
+            highest_prob = max(probabilitas) * 100
+            fig_donut.update_layout(
+                showlegend=False,
+                margin=dict(l=15, r=15, t=20, b=20),
+                height=280,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                annotations=[dict(
+                    text=f"<b>{highest_prob:.1f}%</b><br><span style='font-size:12px;color:#8a5362;'>Keyakinan</span>",
+                    x=0.5, y=0.5, font_size=20, font_color='#d6336c', showarrow=False
+                )]
+            )
+            st.plotly_chart(fig_donut, use_container_width=True)
+
+        with col_g2:
+            st.markdown('<h4 style="color:#d6336c; font-weight:700; margin-bottom:0;">🕸️ Profil Mutu vs Benchmark Unggul</h4>', unsafe_allow_html=True)
+            
+            # Radar Chart Plotly
+            categories = ['Akademik', 'Fasilitas', 'Guru Sertifikasi', 'Kehadiran', 'Kelulusan']
+            school_values = [
+                rata_rata_nilai,
+                persentase_fasilitas_layak,
+                persentase_guru_bersertifikasi,
+                kehadiran_siswa,
+                persentase_lulusan_melanjutkan
+            ]
+            benchmark_values = [85.0, 85.0, 80.0, 90.0, 85.0]
+
+            fig_radar = go.Figure()
+            fig_radar.add_trace(go.Scatterpolar(
+                r=school_values,
+                theta=categories,
+                fill='toself',
+                name='Sekolah Ini',
+                line_color='#ff6f91',
+                fillcolor='rgba(255, 111, 145, 0.35)'
+            ))
+            fig_radar.add_trace(go.Scatterpolar(
+                r=benchmark_values,
+                theta=categories,
+                fill='toself',
+                name='Standar Unggul',
+                line_color='#f59f00',
+                fillcolor='rgba(255, 209, 102, 0.20)'
+            ))
+
+            fig_radar.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100],
+                        tickfont=dict(size=10, color='#8a5362')
+                    ),
+                    bgcolor='rgba(255, 255, 255, 0.6)'
+                ),
+                showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
+                margin=dict(l=25, r=25, t=25, b=25),
+                height=280,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)'
+            )
+            st.plotly_chart(fig_radar, use_container_width=True)
+
+        # 3. SMART INSIGHTS & REKOMENDASI PINTAR
+        st.markdown('<div class="section-title">💡 Analisis Pintar & Rekomendasi</div>', unsafe_allow_html=True)
+
+        strengths = []
+        improvements = []
+
+        if akreditasi == "A":
+            strengths.append("<b>Akreditasi A:</b> Sekolah memiliki legalitas dan penilaian institusi peringkat tertinggi.")
+        else:
+            improvements.append(f"<b>Peningkatan Akreditasi:</b> Akreditasi saat ini ({akreditasi}) dapat ditingkatkan ke A melalui pemenuhan 8 Standar Nasional Pendidikan.")
+
+        if rata_rata_nilai >= 85:
+            strengths.append(f"<b>Akademik Sangat Baik:</b> Rata-rata nilai ({rata_rata_nilai}) berada di atas standar unggul.")
+        elif rata_rata_nilai >= 75:
+            strengths.append(f"<b>Akademik Baik:</b> Rata-rata nilai ({rata_rata_nilai}) sudah cukup baik.")
+        else:
+            improvements.append(f"<b>Penguatan Nilai Akademik:</b> Nilai rata-rata ({rata_rata_nilai}) masih di bawah standar 80. Disarankan program bimbingan belajar intensif.")
+
+        if persentase_fasilitas_layak >= 85:
+            strengths.append(f"<b>Fasilitas Prima:</b> Kelayakan sarana dan prasarana ({persentase_fasilitas_layak}%) sangat menunjang pembelajaran.")
+        else:
+            improvements.append(f"<b>Modernisasi Fasilitas:</b> Fasilitas layak ({persentase_fasilitas_layak}%) perlu ditingkatkan terutama lab komputer, perpustakaan, dan ruang kelas.")
+
+        if persentase_guru_bersertifikasi >= 80:
+            strengths.append(f"<b>SDM Pendidik Profesional:</b> Sebanyak {persentase_guru_bersertifikasi}% guru telah memiliki sertifikasi pendidik.")
+        else:
+            improvements.append(f"<b>Program Sertifikasi Guru:</b> Tingkat guru bersertifikasi ({persentase_guru_bersertifikasi}%) perlu didorong melalui program PPG.")
+
+        if prestasi_akademik >= 10:
+            strengths.append(f"<b>Kaya Prestasi:</b> Memiliki {prestasi_akademik} torehan prestasi akademik di tingkat daerah/nasional.")
+        else:
+            improvements.append(f"<b>Dukungan Kompetisi Siswa:</b> Prestasi akademik ({prestasi_akademik}) dapat ditingkatkan dengan memfasilitasi olimpiade dan lomba sains.")
+
+        if persentase_lulusan_melanjutkan >= 80:
+            strengths.append(f"<b>Daya Saing Kelulusan:</b> {persentase_lulusan_melanjutkan}% lulusan berhasil melanjutkan pendidikan ke jenjang lebih tinggi.")
+        else:
+            improvements.append(f"<b>Bimbingan Karir & Studi:</b> Sebanyak {100 - persentase_lulusan_melanjutkan:.1f}% lulusan belum melanjutkan studi. Perlu konseling karir dan informasi beasiswa.")
+
+        col_ins1, col_ins2 = st.columns(2)
+
+        with col_ins1:
+            render_html(f"""
+            <div class="insight-card" style="border-top: 4px solid #2b8a3e;">
+                <h4 style="color: #2b8a3e;">🌟 Keunggulan Utama Sekolah</h4>
+                <ul class="insight-list">
+                    {''.join([f'<li>{s}</li>' for s in strengths]) if strengths else '<li>Data indikator masih dalam tahap berkembang.</li>'}
+                </ul>
+            </div>
+            """)
+
+        with col_ins2:
+            render_html(f"""
+            <div class="insight-card" style="border-top: 4px solid #f59f00;">
+                <h4 style="color: #d97706;">🚀 Rekomendasi Peningkatan Mutu</h4>
+                <ul class="insight-list">
+                    {''.join([f'<li>{imp}</li>' for imp in improvements]) if improvements else '<li>Pertahankan seluruh standar mutu prima yang sudah dicapai!</li>'}
+                </ul>
+            </div>
+            """)
+
+        # 4. TABEL DETAIL DATA MODEL
+        with st.expander("Lihat Data Matriks yang Diproses Model"):
+            st.dataframe(
+                data_encoded.style
+                .set_properties(**{
+                    "background-color": "#fff9fb",
+                    "color": "#4a2835",
+                    "border-color": "#ffd6df"
+                })
+                .set_table_styles([
+                    {
+                        "selector": "th",
+                        "props": [
+                            ("background-color", "#ff8fab"),
+                            ("color", "#ffffff"),
+                            ("font-weight", "700"),
+                            ("border-color", "#ffd6df")
+                        ]
+                    },
+                    {
+                        "selector": "td",
+                        "props": [
+                            ("background-color", "#fff9fb"),
+                            ("color", "#4a2835"),
+                            ("border-color", "#ffd6df")
+                        ]
+                    }
+                ]),
+                use_container_width=True
+            )
+
+        # 5. TOMBOL DOWNLOAD LAPORAN EVALUASI
+        st.markdown("<br>", unsafe_allow_html=True)
+        now_str = datetime.datetime.now().strftime("%d %B %Y, %H:%M:%S")
+
+        report_content = f"""==================================================
+LAPORAN EVALUASI & KLASIFIKASI MUTU SEKOLAH
+Sistem Berbasis Decision Tree Machine Learning
+==================================================
+Waktu Evaluasi : {now_str}
+Hasil Prediksi : SEKOLAH {hasil.upper()}
+Tingkat Keyakinan : {highest_prob:.2f}%
+
+RINGKASAN INDIKATOR SEKOLAH:
+- Akreditasi Sekolah              : {akreditasi}
+- Jumlah Siswa                    : {jumlah_siswa} orang
+- Jumlah Guru                     : {jumlah_guru} orang
+- Rasio Guru : Siswa              : 1 : {rasio_guru_siswa:.2f} ({badge_status})
+- Persentase Guru Bersertifikasi : {persentase_guru_bersertifikasi}%
+- Rata-rata Nilai Akademik        : {rata_rata_nilai}
+- Jumlah Prestasi Akademik        : {prestasi_akademik} prestasi
+- Fasilitas Layak                 : {persentase_fasilitas_layak}%
+- Tingkat Kehadiran Siswa         : {kehadiran_siswa}%
+- Lulusan Melanjutkan Pendidikan  : {persentase_lulusan_melanjutkan}%
+
+PROBABILITAS MODEL:
+"""
+        for cls_name, p in prob_dict.items():
+            report_content += f"- {cls_name}: {p*100:.2f}%\n"
+
+        report_content += "\nPOIN KEUNGGULAN UTAMA:\n"
+        for s in strengths:
+            clean_s = s.replace("<b>", "").replace("</b>", "")
+            report_content += f"* {clean_s}\n"
+
+        report_content += "\nREKOMENDASI PERBAIKAN MUTU:\n"
+        for imp in improvements:
+            clean_imp = imp.replace("<b>", "").replace("</b>", "")
+            report_content += f"* {clean_imp}\n"
+
+        report_content += "\n==================================================\n"
+        report_content += "Dicetak otomatis oleh Sistem Prediksi Sekolah Unggul\n"
+
+        col_d1, col_d2, col_d3 = st.columns([1, 2, 1])
+        with col_d2:
+            st.download_button(
+                label="📥 Unduh Ringkasan Laporan Mutu (.txt)",
+                data=report_content,
+                file_name=f"Laporan_Prediksi_Sekolah_{hasil}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+
+    except Exception as e:
+        st.error("❌ Terjadi kesalahan saat melakukan prediksi.")
+        st.code(str(e))
+
+
+# =========================================================
+# FOOTER
+# =========================================================
+
+render_html("""
+<div class="footer">
+    🏫 <b>Prediksi Sekolah Unggul</b> • Sistem Klasifikasi Mutu Pendidikan
+    <br><br>
+    Decision Tree Classifier • Streamlit • Plotly Analytics
+</div>
+""")
