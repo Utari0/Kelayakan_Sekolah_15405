@@ -1533,11 +1533,6 @@ with col_p1:
         apply_preset("unggul")
         st.rerun()
 
-with col_p1:
-    if st.button("🌟 Sekolah UHUYY", type="secondary", use_container_width=True):
-        apply_preset("unggul")
-        st.rerun()
-
 with col_p2:
     if st.button("🏫 Sekolah Standar", type="secondary", use_container_width=True):
         apply_preset("standar")
@@ -1551,6 +1546,11 @@ with col_p3:
 with col_p4:
     if st.button("🔄 Reset ke Awal", type="secondary", use_container_width=True):
         apply_preset("default")
+        st.rerun()
+
+with col_p5:
+    if st.button("🌟 Sekolah UHUYY", type="secondary", use_container_width=True):
+        apply_preset("unggul")
         st.rerun()
 
 
